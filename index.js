@@ -30,11 +30,11 @@ class InfluxDBMultiSensorPlatform {
 
       if (existingAccessory) {
         this.log('Restoring existing accessory from cache:', existingAccessory.displayName);
-        new InfluxDBMultiSensorAccessory(this, existingAccessory, sensorConfig);
+        new InfluxDBMultiSensorAccessory(this, existingAccessory, sensorConfig, this.config.globalValues);
       } else {
         this.log('Adding new accessory:', sensorConfig.name);
         const accessory = new this.api.platformAccessory(sensorConfig.name, uuid);
-        new InfluxDBMultiSensorAccessory(this, accessory, sensorConfig);
+        new InfluxDBMultiSensorAccessory(this, accessory, sensorConfig, this.config.globalValues);
         this.api.registerPlatformAccessories('homebridge-influxdb-multisensor', 'InfluxDBMultiSensor', [accessory]);
       }
     });
@@ -46,10 +46,11 @@ class InfluxDBMultiSensorPlatform {
 }
 
 class InfluxDBMultiSensorAccessory {
-  constructor(platform, accessory, sensorConfig) {
+  constructor(platform, accessory, sensorConfig, globalValues) {
     this.platform = platform;
     this.accessory = accessory;
     this.sensorConfig = sensorConfig;
+    this.globalValues = globalValues;
 
     this.accessory.context = {
       value: 0
@@ -57,9 +58,9 @@ class InfluxDBMultiSensorAccessory {
 
     // Adding accessory information
     this.accessory.getService(platform.api.hap.Service.AccessoryInformation)
-      .setCharacteristic(platform.api.hap.Characteristic.Manufacturer, platform.config.globalValues.manufacturer)
-      .setCharacteristic(platform.api.hap.Characteristic.SerialNumber, platform.config.globalValues.serialNumber)
-      .setCharacteristic(platform.api.hap.Characteristic.Model, platform.config.globalValues.model);
+      .setCharacteristic(platform.api.hap.Characteristic.Manufacturer, globalValues.manufacturer)
+      .setCharacteristic(platform.api.hap.Characteristic.SerialNumber, globalValues.serialNumber)
+      .setCharacteristic(platform.api.hap.Characteristic.Model, globalValues.model);
 
     // Add services for each field
     sensorConfig.fields.forEach(field => {
@@ -133,3 +134,4 @@ class InfluxDBMultiSensorAccessory {
     }
   }
 }
+
