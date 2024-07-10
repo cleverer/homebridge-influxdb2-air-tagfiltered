@@ -16,19 +16,19 @@
       "bucket": "your-influxdb-bucket",
       "sensors": [
         {
-          "name": "Temperature Salon",
-          "topic": "zigbee2mqtt/Temperature_Salon",
+          "name": "Temperature Room1",
+          "topic": "zigbee2mqtt/Sensor_Room1",
           "field": "temperature"
         },
         {
           "name": "Humidity Salon",
-          "topic": "zigbee2mqtt/Temperature_Salon",
+          "topic": "zigbee2mqtt/Sensor_Room1",
           "field": "humidity"
         },
         {
-          "name": "Temperature Chambre",
-          "topic": "zigbee2mqtt/Temperature_Chambre",
-          "field": "temperature"
+          "name": "Battery level sensor_Room1",
+          "topic": "zigbee2mqtt/Sensor_Room1",
+          "field": "battery"
         }
        # Add more sensors here 
       ]
