@@ -29,37 +29,27 @@ Add to the `accessories` field of your Homebridge `config.json` file (default lo
   ...
   "platforms": [
     {
-      "platform": "InfluxDBSensor",
+      "platform": "InfluxDBMultiSensor",
       "name": "InfluxDB Sensor",
       "url": "http://your-influxdb-url",
       "token": "your-influxdb-token",
       "organization": "your-influxdb-organization",
-      "bucket": "your-influxdb-bucket",
+      "bucket": "your-influxdb-bucket",,
+      "globalValues": {
+        "manufacturer": "Your Manufacturer",
+        "serialNumber": "1234567890",
+        "model": "Sensor"
+      },
       "sensors": [
         {
           "name": "Temperature Room1",
-          "topic": "zigbee2mqtt/Sensor_Room1",
-          "field": "temperature",
-          "manufacturer": "Your Manufacturer",
-          "serialNumber": "1234567890",
-          "model": "Temperature Sensor"
-        },
-        {
-          "name": "Humidity  Room1",
-          "topic": "zigbee2mqtt/Sensor_Room1",
-          "field": "humidity",
-          "manufacturer": "Your Manufacturer",
-          "serialNumber": "1234567890",
-          "model": "Humidity Sensor"
-        },
-        {
-          "name": "Battery Room1",
-          "topic": "zigbee2mqtt/Sensor_Room1",
-          "field": "battery",
-          "manufacturer": "Your Manufacturer",
-          "serialNumber": "1234567890",
-          "model": "Sensor"
-        }
+          "fields": [
+              "temperature",
+              "humidity",
+              "battery"
+          ],
+          "topic": "zigbee2mqtt/Sensor_Room1"
+      }
        # Add more sensors here 
       ]
     }
