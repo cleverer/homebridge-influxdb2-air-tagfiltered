@@ -1,10 +1,10 @@
 const { InfluxDB } = require('@influxdata/influxdb-client');
 
 module.exports = (api) => {
-  api.registerPlatform('InfluxDBSensor', InfluxDBSensorPlatform);
+  api.registerPlatform('InfluxDBMultiSensor', InfluxDBMultiSensorPlatform);
 };
 
-class InfluxDBSensorPlatform {
+class InfluxDBMultiSensorPlatform {
   constructor(log, config, api) {
     this.log = log;
     this.config = config;
@@ -30,12 +30,12 @@ class InfluxDBSensorPlatform {
 
       if (existingAccessory) {
         this.log('Restoring existing accessory from cache:', existingAccessory.displayName);
-        new InfluxDBSensorAccessory(this, existingAccessory, sensorConfig);
+        new InfluxDBMultiSensorAccessory(this, existingAccessory, sensorConfig);
       } else {
         this.log('Adding new accessory:', sensorConfig.name);
         const accessory = new this.api.platformAccessory(sensorConfig.name, uuid);
-        new InfluxDBSensorAccessory(this, accessory, sensorConfig);
-        this.api.registerPlatformAccessories('homebridge-influxdb-sensor', 'InfluxDBSensor', [accessory]);
+        new InfluxDBMultiSensorAccessory(this, accessory, sensorConfig);
+        this.api.registerPlatformAccessories('homebridge-influxdb-multisensor', 'InfluxDBMultiSensor', [accessory]);
       }
     });
   }
@@ -45,28 +45,26 @@ class InfluxDBSensorPlatform {
   }
 }
 
-class InfluxDBSensorAccessory {
+class InfluxDBMultiSensorAccessory {
   constructor(platform, accessory, sensorConfig) {
     this.platform = platform;
     this.accessory = accessory;
     this.sensorConfig = sensorConfig;
 
-    this.service = this.getServiceByField(sensorConfig.field);
-    if (this.service) {
-      this.service.setCharacteristic(this.platform.api.hap.Characteristic.Name, accessory.displayName);
+    // Ajouter les services pour chaque champ spécifié dans sensorConfig.fields
+    sensorConfig.fields.forEach(field => {
+      const service = this.getServiceByField(field);
+      if (service) {
+        service.setCharacteristic(this.platform.api.hap.Characteristic.Name, accessory.displayName);
+        this.accessory.addService(service);
+      }
+    });
 
-      // Set manufacturer, serial number, and model from config.json
-      this.accessory
-        .getService(this.platform.api.hap.Service.AccessoryInformation)
-        .setCharacteristic(this.platform.api.hap.Characteristic.Manufacturer, sensorConfig.manufacturer)
-        .setCharacteristic(this.platform.api.hap.Characteristic.SerialNumber, sensorConfig.serialNumber)
-        .setCharacteristic(this.platform.api.hap.Characteristic.Model, sensorConfig.model);
-
-      // Optional: Set firmware revision
-      this.accessory
-        .getService(this.platform.api.hap.Service.AccessoryInformation)
-        .setCharacteristic(this.platform.api.hap.Characteristic.FirmwareRevision, '1.0.0');
-    }
+    // Ajouter les informations de l'accessoire
+    this.accessory.getService(this.platform.api.hap.Service.AccessoryInformation)
+      .setCharacteristic(this.platform.api.hap.Characteristic.Manufacturer, this.platform.config.globalValues.manufacturer)
+      .setCharacteristic(this.platform.api.hap.Characteristic.SerialNumber, this.platform.config.globalValues.serialNumber)
+      .setCharacteristic(this.platform.api.hap.Characteristic.Model, this.platform.config.globalValues.model);
 
     this.accessory.context = {
       value: 0
@@ -84,9 +82,7 @@ class InfluxDBSensorAccessory {
         return this.accessory.getService(Service.TemperatureSensor) || this.accessory.addService(Service.TemperatureSensor);
       case 'humidity':
         return this.accessory.getService(Service.HumiditySensor) || this.accessory.addService(Service.HumiditySensor);
-      case 'airQuality':
-        return this.accessory.getService(Service.AirQualitySensor) || this.accessory.addService(Service.AirQualitySensor);
-      case 'battery': 
+      case 'battery':
         return this.accessory.getService(Service.BatteryService) || this.accessory.addService(Service.BatteryService);
       default:
         this.platform.log.warn('Unsupported sensor field:', field);
@@ -116,31 +112,25 @@ class InfluxDBSensorAccessory {
 
   updateCharacteristic(field, value) {
     const { Characteristic } = this.platform.api.hap;
-    this.platform.log(`Received battery level value from InfluxDB: ${value}`);
-    const batteryLevelString = value.toString().replace(',', '');
-    const batteryLevel = parseInt(batteryLevelString, 10);
-
     switch (field) {
       case 'temperature':
-        this.service.updateCharacteristic(Characteristic.CurrentTemperature, value);
+        this.accessory.getService(Service.TemperatureSensor)
+          .updateCharacteristic(Characteristic.CurrentTemperature, value);
         break;
       case 'humidity':
-        this.service.updateCharacteristic(Characteristic.CurrentRelativeHumidity, value);
-        break;
-      case 'airQuality':
-        this.service.updateCharacteristic(Characteristic.AirQuality, value);
+        this.accessory.getService(Service.HumiditySensor)
+          .updateCharacteristic(Characteristic.CurrentRelativeHumidity, value);
         break;
       case 'battery':
-        if (!isNaN(batteryLevel) && batteryLevel >= 0 && batteryLevel <= 100) {
-          this.service.updateCharacteristic(Characteristic.BatteryLevel, batteryLevel);
-          const statusLowBattery = batteryLevel < 20 ? Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW : Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL;
-          this.service.updateCharacteristic(Characteristic.StatusLowBattery, statusLowBattery);
-        } else {
-          this.platform.log.error(`Invalid battery level value received from InfluxDB: ${value}`);
-        }
+        this.accessory.getService(Service.BatteryService)
+          .updateCharacteristic(Characteristic.BatteryLevel, value);
+        const statusLowBattery = value < 20 ? Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW : Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL;
+        this.accessory.getService(Service.BatteryService)
+          .updateCharacteristic(Characteristic.StatusLowBattery, statusLowBattery);
         break;
       default:
         this.platform.log.warn('Unsupported sensor field:', field);
     }
   }
 }
+

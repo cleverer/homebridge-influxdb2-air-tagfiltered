@@ -14,25 +14,33 @@
       "token": "your-influxdb-token",
       "organization": "your-influxdb-organization",
       "bucket": "your-influxdb-bucket",
+      "globalValues": {
+        "manufacturer": "Your Manufacturer",
+        "serialNumber": "1234567890",
+        "model": "Sensor"
+      },
       "sensors": [
         {
           "name": "Temperature Room1",
           "topic": "zigbee2mqtt/Sensor_Room1",
-          "field": "temperature","manufacturer": "Your Manufacturer",
+          "field": "temperature",
+          "manufacturer": "Your Manufacturer",
           "serialNumber": "1234567890",
           "model": "Temperature Sensor"
         },
         {
           "name": "Humidity Salon",
           "topic": "zigbee2mqtt/Sensor_Room1",
-          "field": "humidity","manufacturer": "Your Manufacturer",
+          "field": "humidity",
+          "manufacturer": "Your Manufacturer",
           "serialNumber": "1234567890",
           "model": "Humidity Sensor"
         },
         {
           "name": "Battery level sensor_Room1",
           "topic": "zigbee2mqtt/Sensor_Room1",
-          "field": "battery","manufacturer": "Your Manufacturer",
+          "field": "battery",
+          "manufacturer": "Your Manufacturer",
           "serialNumber": "1234567890",
           "model": "Sensor"
         }
