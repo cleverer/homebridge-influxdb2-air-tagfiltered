@@ -1,5 +1,4 @@
 const { InfluxDB } = require('@influxdata/influxdb-client');
-const { API, Service, Characteristic, UUIDGen } = require('homebridge');
 
 module.exports = (api) => {
   api.registerPlatform('InfluxDBSensor', InfluxDBSensorPlatform);
@@ -26,7 +25,7 @@ class InfluxDBSensorPlatform {
 
   discoverDevices() {
     this.config.sensors.forEach(sensorConfig => {
-      const uuid = UUIDGen.generate(sensorConfig.name);
+      const uuid = this.api.hap.uuid.generate(sensorConfig.name);
       const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
 
       if (existingAccessory) {
@@ -52,8 +51,27 @@ class InfluxDBSensorAccessory {
     this.accessory = accessory;
     this.sensorConfig = sensorConfig;
 
-    this.service = this.accessory.getService(Service.TemperatureSensor) || this.accessory.addService(Service.TemperatureSensor);
-    this.service.setCharacteristic(Characteristic.Name, accessory.displayName);
+    let serviceType;
+    switch (sensorConfig.field) {
+      case 'temperature':
+        serviceType = this.platform.api.hap.Service.TemperatureSensor;
+        break;
+      case 'humidity':
+        serviceType = this.platform.api.hap.Service.HumiditySensor;
+        break;
+      case 'airQuality':
+        serviceType = this.platform.api.hap.Service.AirQualitySensor;
+        break;
+      case 'batteryLevel':
+        serviceType = this.platform.api.hap.Service.BatteryService;
+        break;
+      default:
+        this.platform.log.warn('Unsupported sensor field:', sensorConfig.field);
+        return;
+    }
+
+    this.service = this.accessory.getService(serviceType) || this.accessory.addService(serviceType);
+    this.service.setCharacteristic(this.platform.api.hap.Characteristic.Name, accessory.displayName);
 
     this.accessory.context = {
       value: 0
@@ -77,14 +95,19 @@ class InfluxDBSensorAccessory {
       const rows = await this.platform.queryApi.collectRows(fluxQuery);
       rows.forEach(row => {
         this.accessory.context.value = row._value;
-        if (this.sensorConfig.field === 'temperature') {
-          this.service.updateCharacteristic(Characteristic.CurrentTemperature, row._value);
-        } else if (this.sensorConfig.field === 'humidity') {
-          // Add humidity service and update characteristic
-        } else if (this.sensorConfig.field === 'airQuality') {
-          // Add air quality service and update characteristic
-        } else if (this.sensorConfig.field === 'batteryLevel') {
-          // Add battery service and update characteristic
+        switch (this.sensorConfig.field) {
+          case 'temperature':
+            this.service.updateCharacteristic(this.platform.api.hap.Characteristic.CurrentTemperature, row._value);
+            break;
+          case 'humidity':
+            this.service.updateCharacteristic(this.platform.api.hap.Characteristic.CurrentRelativeHumidity, row._value);
+            break;
+          case 'airQuality':
+            this.service.updateCharacteristic(this.platform.api.hap.Characteristic.AirQuality, row._value);
+            break;
+          case 'batteryLevel':
+            this.service.updateCharacteristic(this.platform.api.hap.Characteristic.BatteryLevel, row._value);
+            break;
         }
       });
     } catch (error) {
@@ -92,4 +115,3 @@ class InfluxDBSensorAccessory {
     }
   }
 }
-
