@@ -1,6 +1,6 @@
 {
   "name": "homebridge-influxdb2-air",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "Homebridge plugin to fetch sensor data from InfluxDB v2",
   "main": "index.js",
   "keywords": [

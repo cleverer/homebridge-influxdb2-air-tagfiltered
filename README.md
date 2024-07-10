@@ -31,7 +31,7 @@ Add to the `accessories` field of your Homebridge `config.json` file (default lo
     {
       "platform": "InfluxDBMultiSensor",
       "name": "InfluxDB Sensor",
-      "url": "http://your-influxdb-url",
+      "url": "http://your-influxdb-url:port",
       "token": "your-influxdb-token",
       "organization": "your-influxdb-organization",
       "bucket": "your-influxdb-bucket",,

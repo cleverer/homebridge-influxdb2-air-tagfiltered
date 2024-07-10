@@ -10,7 +10,7 @@
     {
       "platform": "InfluxDBMultiSensor",
       "name": "InfluxDB MultiSensor Platform",
-      "url": "http://your-influxdb-url",
+      "url": "http://your-influxdb-url:port",
       "token": "your-influxdb-token",
       "organization": "your-influxdb-organization",
       "bucket": "your-influxdb-bucket",
