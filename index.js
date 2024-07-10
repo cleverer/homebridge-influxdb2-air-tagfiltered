@@ -54,6 +54,18 @@ class InfluxDBSensorAccessory {
     this.service = this.getServiceByField(sensorConfig.field);
     if (this.service) {
       this.service.setCharacteristic(this.platform.api.hap.Characteristic.Name, accessory.displayName);
+
+      // Set manufacturer, serial number, and model from config.json
+      this.accessory
+        .getService(this.platform.api.hap.Service.AccessoryInformation)
+        .setCharacteristic(this.platform.api.hap.Characteristic.Manufacturer, sensorConfig.manufacturer)
+        .setCharacteristic(this.platform.api.hap.Characteristic.SerialNumber, sensorConfig.serialNumber)
+        .setCharacteristic(this.platform.api.hap.Characteristic.Model, sensorConfig.model);
+
+      // Optional: Set firmware revision
+      this.accessory
+        .getService(this.platform.api.hap.Service.AccessoryInformation)
+        .setCharacteristic(this.platform.api.hap.Characteristic.FirmwareRevision, '1.0.0');
     }
 
     this.accessory.context = {
@@ -115,10 +127,13 @@ class InfluxDBSensorAccessory {
         this.service.updateCharacteristic(Characteristic.AirQuality, value);
         break;
       case 'battery':
-        this.service.updateCharacteristic(Characteristic.BatteryLevel, value);
-        // Optional: Update the status low battery characteristic based on value
-        const statusLowBattery = value < 20 ? Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW : Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL;
-        this.service.updateCharacteristic(Characteristic.StatusLowBattery, statusLowBattery);
+        if (!isNaN(batteryLevel) && batteryLevel >= 0 && batteryLevel <= 100) {
+          this.service.updateCharacteristic(Characteristic.BatteryLevel, batteryLevel);
+          const statusLowBattery = batteryLevel < 20 ? Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW : Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL;
+          this.service.updateCharacteristic(Characteristic.StatusLowBattery, statusLowBattery);
+        } else {
+          this.platform.log.error(`Invalid battery level value received from InfluxDB: ${value}`);
+        }
         break;
       default:
         this.platform.log.warn('Unsupported sensor field:', field);

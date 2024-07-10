@@ -39,17 +39,26 @@ Add to the `accessories` field of your Homebridge `config.json` file (default lo
         {
           "name": "Temperature Room1",
           "topic": "zigbee2mqtt/Sensor_Room1",
-          "field": "temperature"
+          "field": "temperature",
+          "manufacturer": "Your Manufacturer",
+          "serialNumber": "1234567890",
+          "model": "Temperature Sensor"
         },
         {
           "name": "Humidity  Room1",
           "topic": "zigbee2mqtt/Sensor_Room1",
-          "field": "humidity"
+          "field": "humidity",
+          "manufacturer": "Your Manufacturer",
+          "serialNumber": "1234567890",
+          "model": "Humidity Sensor"
         },
         {
           "name": "Battery Room1",
           "topic": "zigbee2mqtt/Sensor_Room1",
-          "field": "battery"
+          "field": "battery",
+          "manufacturer": "Your Manufacturer",
+          "serialNumber": "1234567890",
+          "model": "Sensor"
         }
        # Add more sensors here 
       ]
