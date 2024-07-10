@@ -85,7 +85,7 @@ class InfluxDBSensorAccessory {
   async getSensorData() {
     const fluxQuery = `
       from(bucket: "${this.platform.config.bucket}")
-        |> range(start: -1m)
+        |> range(start: 0)
         |> filter(fn: (r) => r["topic"] == "${this.sensorConfig.topic}")
         |> filter(fn: (r) => r["_field"] == "${this.sensorConfig.field}")
         |> last()
