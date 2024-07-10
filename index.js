@@ -86,7 +86,7 @@ class InfluxDBSensorAccessory {
         return this.accessory.getService(Service.HumiditySensor) || this.accessory.addService(Service.HumiditySensor);
       case 'airQuality':
         return this.accessory.getService(Service.AirQualitySensor) || this.accessory.addService(Service.AirQualitySensor);
-      case 'battery':
+      case 'battery': 
         return this.accessory.getService(Service.BatteryService) || this.accessory.addService(Service.BatteryService);
       default:
         this.platform.log.warn('Unsupported sensor field:', field);
@@ -116,6 +116,10 @@ class InfluxDBSensorAccessory {
 
   updateCharacteristic(field, value) {
     const { Characteristic } = this.platform.api.hap;
+    this.platform.log(`Received battery level value from InfluxDB: ${value}`);
+    const batteryLevelString = value.toString().replace(',', '');
+    const batteryLevel = parseInt(batteryLevelString, 10);
+
     switch (field) {
       case 'temperature':
         this.service.updateCharacteristic(Characteristic.CurrentTemperature, value);
