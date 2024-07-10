@@ -24,6 +24,11 @@ class InfluxDBMultiSensorPlatform {
   }
 
   discoverDevices() {
+    if (!Array.isArray(this.config.sensors)) {
+      this.log.error('Configuration error: "sensors" is not an array or is missing.');
+      return;
+    }
+
     this.config.sensors.forEach(sensorConfig => {
       const uuid = this.api.hap.uuid.generate(sensorConfig.name);
       const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
@@ -93,29 +98,41 @@ class InfluxDBMultiSensorAccessory {
   }
 
   async getSensorData() {
-    const fluxQuery = `
-      from(bucket: "${this.platform.config.bucket}")
-        |> range(start: 0)
-        |> filter(fn: (r) => r["topic"] == "${this.sensorConfig.topic}")
-        |> filter(fn: (r) => r["_field"] == "${this.sensorConfig.field}")
-        |> last()
-    `;
+    this.sensorConfig.fields.forEach(async (field) => {
+      const fluxQuery = `
+        from(bucket: "${this.platform.config.bucket}")
+          |> range(start: 0)
+          |> filter(fn: (r) => r["topic"] == "${this.sensorConfig.topic}")
+          |> filter(fn: (r) => r["_field"] == "${field}")
+          |> last()
+      `;
 
-    try {
-      const rows = await this.platform.queryApi.collectRows(fluxQuery);
-      rows.forEach(row => {
-        this.accessory.context.value = parseFloat(row._value.replace(',', '.')); // Ensure value is a float
-        this.updateCharacteristic(this.sensorConfig.field, this.accessory.context.value);
-      });
-    } catch (error) {
-      this.platform.log.error('Error fetching sensor data:', error);
-    }
+      this.platform.log('Running query:', fluxQuery);
+
+      try {
+        const rows = await this.platform.queryApi.collectRows(fluxQuery);
+        this.platform.log('Query results for field', field, ':', rows);
+
+        rows.forEach(row => {
+          let value = row._value;
+          if (typeof value === 'string') {
+            value = parseFloat(value.replace(',', '.')); // Ensure value is a float
+          }
+          this.accessory.context.value = value;
+          this.updateCharacteristic(field, value);
+        });
+      } catch (error) {
+        this.platform.log.error('Error fetching sensor data for field', field, ':', error);
+      }
+    });
   }
 
   updateCharacteristic(field, value) {
     const { Characteristic } = this.platform.api.hap;
     const service = this.getServiceByField(field);
     if (!service) return;
+
+    this.platform.log('Updating characteristic for field:', field, 'with value:', value);
 
     switch (field) {
       case 'temperature':
@@ -134,4 +151,3 @@ class InfluxDBMultiSensorAccessory {
     }
   }
 }
-
