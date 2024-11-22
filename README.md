@@ -27,8 +27,8 @@ Add to the `accessories` field of your Homebridge `config.json` file (default lo
   ...
   "platforms": [
     {
-      "platform": "InfluxDBMultiSensor",
-      "name": "InfluxDB Sensor",
+      "platform": "InfluxDB2AirTagfiltered",
+      "name": "InfluxDB Sensors",
       "url": "http://your-influxdb-url:port",
       "token": "your-influxdb-token",
       "organization": "your-influxdb-organization",
