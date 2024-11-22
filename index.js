@@ -97,15 +97,26 @@ class InfluxDBMultiSensorAccessory {
     }
   }
 
-  async getSensorData() {
-    this.sensorConfig.fields.forEach(async (field) => {
-      const fluxQuery = `
+  buildFluxQuery(sensorConfig, field) {
+    var query = `
         from(bucket: "${this.platform.config.bucket}")
           |> range(start: 0)
-          |> filter(fn: (r) => r["topic"] == "${this.sensorConfig.topic}")
-          |> filter(fn: (r) => r["_field"] == "${field}")
-          |> last()
-      `;
+          |> filter(fn: (r) => r["_field"] == "${field}")`;
+
+    for (const tagname of sensorConfig.tags) {
+      query += `
+          |> filter(fn: (r) => r["${tagname}"] == "${sensorConfig.tags[tagname]}")`;
+    }
+
+    query += `
+          |> last()`;
+
+    return query;
+  }
+
+  async getSensorData() {
+    this.sensorConfig.fields.forEach(async (field) => {
+      const fluxQuery = this.buildFluxQuery(this.sensorConfig, field);
 
       this.platform.log('Running query:', fluxQuery);
 

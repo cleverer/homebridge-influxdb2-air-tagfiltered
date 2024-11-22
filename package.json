@@ -1,6 +1,6 @@
 {
-  "name": "homebridge-influxdb2-air",
-  "version": "1.0.14",
+  "name": "homebridge-influxdb2-air-tagfiltered",
+  "version": "0.0.1-alpha.0",
   "description": "Homebridge plugin to fetch sensor data from InfluxDB v2",
   "main": "index.js",
   "keywords": [
@@ -10,7 +10,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "colussim ",
+  "author": "cleverer",
   "license": "ISC",
   "dependencies": {
     "@influxdata/influxdb-client": "^1.33.2",
@@ -18,10 +18,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/colussim/homebridge-influxdb2-air"
+    "url": "git+https://github.com/cleverer/homebridge-influxdb2-air-tagfiltered.git"
   },
   "engines": {
     "homebridge": ">=1.3.4",
     "node": ">=14.17.0"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/cleverer/homebridge-influxdb2-air-tagfiltered/issues"
+  },
+  "homepage": "https://github.com/cleverer/homebridge-influxdb2-air-tagfiltered#readme",
+  "devDependencies": {}
 }

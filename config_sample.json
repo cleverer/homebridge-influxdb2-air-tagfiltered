@@ -27,7 +27,9 @@
               "humidity",
               "battery"
           ],
-          "topic": "zigbee2mqtt/Sensor_Room1"
+          "tags": {
+              "topic": "zigbee2mqtt/Sensor_Room1"
+          }
       }
        # Add more sensors here 
       ]
