@@ -44,9 +44,24 @@ Add to the `accessories` field of your Homebridge `config.json` file (default lo
           "measurements": [
               "temperature",
               "humidity",
-              "battery"
+              "battery_level"
           ],
           "field": "offset_compensated",
+          "tags": {
+            "tag-name": "tag-value"
+          },
+          "manufacturer": "Your Manufacturer",
+          "serialNumber": "123456789",
+          "model": "Sensor"
+      }
+      {
+          "name": "Temperature Room2",
+          "measurements": [
+              "temperature",
+              "humidity",
+              "battery"
+          ],
+          "field": "actual",
           "tags": {
             "tag-name": "tag-value"
           }

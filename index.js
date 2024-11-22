@@ -63,9 +63,9 @@ class InfluxDBMultiSensorAccessory {
 
     // Adding accessory information
     this.accessory.getService(platform.api.hap.Service.AccessoryInformation)
-      .setCharacteristic(platform.api.hap.Characteristic.Manufacturer, globalValues.manufacturer)
-      .setCharacteristic(platform.api.hap.Characteristic.SerialNumber, globalValues.serialNumber)
-      .setCharacteristic(platform.api.hap.Characteristic.Model, globalValues.model);
+      .setCharacteristic(platform.api.hap.Characteristic.Manufacturer, sensorConfig.manufacturer ?? globalValues.manufacturer)
+      .setCharacteristic(platform.api.hap.Characteristic.SerialNumber, sensorConfig.serialNumber ?? globalValues.serialNumber)
+      .setCharacteristic(platform.api.hap.Characteristic.Model, sensorConfig.model ?? globalValues.model);
 
     // Add services for each measurement
     sensorConfig.measurements.forEach(measurement => {
