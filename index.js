@@ -105,7 +105,7 @@ class InfluxDBMultiSensorAccessory {
           |> filter(fn: (r) => r["_field"] == "${field}")
           |> filter(fn: (r) => r["_measurement"] == "${measurement}")`;
 
-    for (const tagname of sensorConfig.tags) {
+    for (const tagname in sensorConfig.tags) {
       query += `
           |> filter(fn: (r) => r["${tagname}"] == "${sensorConfig.tags[tagname]}")`;
     }
