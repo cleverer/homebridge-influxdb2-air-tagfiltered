@@ -98,11 +98,11 @@ class InfluxDBMultiSensorAccessory {
     }
   }
 
-  buildFluxQuery(sensorConfig, field, measurement) {
+  buildFluxQuery(sensorConfig, measurement) {
     var query = `
         from(bucket: "${this.platform.config.bucket}")
           |> range(start: 0)
-          |> filter(fn: (r) => r["_field"] == "${field}")
+          |> filter(fn: (r) => r["_field"] == "${sensorConfig.field}")
           |> filter(fn: (r) => r["_measurement"] == "${measurement}")`;
 
     for (const tagname in sensorConfig.tags) {
