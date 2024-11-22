@@ -90,6 +90,7 @@ class InfluxDBMultiSensorAccessory {
       case 'humidity':
         return this.accessory.getServiceById(Service.HumiditySensor, subtype) || this.accessory.addService(Service.HumiditySensor, `${this.accessory.displayName} Humidity`, subtype);
       case 'battery':
+      case 'battery_level':
         return this.accessory.getServiceById(Service.BatteryService, subtype) || this.accessory.addService(Service.BatteryService, `${this.accessory.displayName} Battery`, subtype);
       default:
         this.platform.log.warn('Unsupported sensor measurement:', measurement);
@@ -154,7 +155,8 @@ class InfluxDBMultiSensorAccessory {
         service.updateCharacteristic(Characteristic.CurrentRelativeHumidity, value);
         break;
       case 'battery':
-        service.updateCharacteristic(Characteristic.BatteryLevel, value);
+      case 'battery_level':
+          service.updateCharacteristic(Characteristic.BatteryLevel, value);
         const statusLowBattery = value < 20 ? Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW : Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL;
         service.updateCharacteristic(Characteristic.StatusLowBattery, statusLowBattery);
         break;
