@@ -1,10 +1,10 @@
 const { InfluxDB } = require('@influxdata/influxdb-client');
 
 module.exports = (api) => {
-  api.registerPlatform('InfluxDBMultiSensor', InfluxDBMultiSensorPlatform);
+  api.registerPlatform('InfluxDB2AirTagfiltered', InfluxDB2AirTagfilteredPlatform);
 };
 
-class InfluxDBMultiSensorPlatform {
+class InfluxDB2AirTagfilteredPlatform {
   constructor(log, config, api) {
     this.log = log;
     this.config = config;
@@ -35,12 +35,12 @@ class InfluxDBMultiSensorPlatform {
 
       if (existingAccessory) {
         this.log('Restoring existing accessory from cache:', existingAccessory.displayName);
-        new InfluxDBMultiSensorAccessory(this, existingAccessory, sensorConfig, this.config.globalValues);
+        new InfluxDB2AirTagfilteredAccessory(this, existingAccessory, sensorConfig, this.config.globalValues);
       } else {
         this.log('Adding new accessory:', sensorConfig.name);
         const accessory = new this.api.platformAccessory(sensorConfig.name, uuid);
-        new InfluxDBMultiSensorAccessory(this, accessory, sensorConfig, this.config.globalValues);
-        this.api.registerPlatformAccessories('homebridge-influxdb-multisensor', 'InfluxDBMultiSensor', [accessory]);
+        new InfluxDB2AirTagfilteredAccessory(this, accessory, sensorConfig, this.config.globalValues);
+        this.api.registerPlatformAccessories('homebridge-influxdb2-air-tagfiltered', 'InfluxDB2AirTagfiltered', [accessory]);
       }
     });
   }
@@ -50,7 +50,7 @@ class InfluxDBMultiSensorPlatform {
   }
 }
 
-class InfluxDBMultiSensorAccessory {
+class InfluxDB2AirTagfilteredAccessory {
   constructor(platform, accessory, sensorConfig, globalValues) {
     this.platform = platform;
     this.accessory = accessory;
