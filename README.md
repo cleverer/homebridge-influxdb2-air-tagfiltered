@@ -6,7 +6,7 @@
 
 Homebridge InfluxDB2 Air Tagfiltered is a plugin that exposes temperature, humidity, battery level from sensors stored in an InfluxDB v2 database. It collects the latest values using the a configurable list of tagvalues and field as filters in the InfluxDB query, making this data available for integration with Homebridge. This allows for seamless monitoring and control of your sensor data within your smart home ecosystem.
 
-This is a fork of https://github.com/colussim/homebridge-influxdb2-air with the addition of flixble tag filtering.
+This is a fork of https://github.com/colussim/homebridge-influxdb2-air with the addition of flexible tag filtering.
 
 ---
 
