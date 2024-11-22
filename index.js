@@ -67,11 +67,11 @@ class InfluxDBMultiSensorAccessory {
       .setCharacteristic(platform.api.hap.Characteristic.SerialNumber, globalValues.serialNumber)
       .setCharacteristic(platform.api.hap.Characteristic.Model, globalValues.model);
 
-    // Add services for each field
-    sensorConfig.fields.forEach(field => {
-      const service = this.getServiceByField(field);
+    // Add services for each measurement
+    sensorConfig.measurements.forEach(measurement => {
+      const service = this.getServiceByMeasurement(measurement);
       if (service) {
-        service.setCharacteristic(platform.api.hap.Characteristic.Name, `${accessory.displayName} ${field}`);
+        service.setCharacteristic(platform.api.hap.Characteristic.Name, `${accessory.displayName} ${measurement}`);
       }
     });
 
@@ -80,11 +80,11 @@ class InfluxDBMultiSensorAccessory {
     }, 60000); // Fetch data every 60 seconds
   }
 
-  getServiceByField(field) {
+  getServiceByMeasurement(measurement) {
     const { Service } = this.platform.api.hap;
-    const subtype = `${this.accessory.displayName}-${field}`;
+    const subtype = `${this.accessory.displayName}-${measurement}`;
 
-    switch (field) {
+    switch (measurement) {
       case 'temperature':
         return this.accessory.getServiceById(Service.TemperatureSensor, subtype) || this.accessory.addService(Service.TemperatureSensor, `${this.accessory.displayName} Temperature`, subtype);
       case 'humidity':
@@ -92,16 +92,17 @@ class InfluxDBMultiSensorAccessory {
       case 'battery':
         return this.accessory.getServiceById(Service.BatteryService, subtype) || this.accessory.addService(Service.BatteryService, `${this.accessory.displayName} Battery`, subtype);
       default:
-        this.platform.log.warn('Unsupported sensor field:', field);
+        this.platform.log.warn('Unsupported sensor measurement:', measurement);
         return null;
     }
   }
 
-  buildFluxQuery(sensorConfig, field) {
+  buildFluxQuery(sensorConfig, field, measurement) {
     var query = `
         from(bucket: "${this.platform.config.bucket}")
           |> range(start: 0)
-          |> filter(fn: (r) => r["_field"] == "${field}")`;
+          |> filter(fn: (r) => r["_field"] == "${field}")
+          |> filter(fn: (r) => r["_measurement"] == "${measurement}")`;
 
     for (const tagname of sensorConfig.tags) {
       query += `
@@ -115,14 +116,14 @@ class InfluxDBMultiSensorAccessory {
   }
 
   async getSensorData() {
-    this.sensorConfig.fields.forEach(async (field) => {
-      const fluxQuery = this.buildFluxQuery(this.sensorConfig, field);
+    this.sensorConfig.measurements.forEach(async (measurement) => {
+      const fluxQuery = this.buildFluxQuery(this.sensorConfig, measurement);
 
       this.platform.log('Running query:', fluxQuery);
 
       try {
         const rows = await this.platform.queryApi.collectRows(fluxQuery);
-        this.platform.log('Query results for field', field, ':', rows);
+        this.platform.log('Query results for measurement', measurement, ':', rows);
 
         rows.forEach(row => {
           let value = row._value;
@@ -130,22 +131,22 @@ class InfluxDBMultiSensorAccessory {
             value = parseFloat(value.replace(',', '.')); // Ensure value is a float
           }
           this.accessory.context.value = value;
-          this.updateCharacteristic(field, value);
+          this.updateCharacteristic(measurement, value);
         });
       } catch (error) {
-        this.platform.log.error('Error fetching sensor data for field', field, ':', error);
+        this.platform.log.error('Error fetching sensor data for measurement', measurement, ':', error);
       }
     });
   }
 
-  updateCharacteristic(field, value) {
+  updateCharacteristic(measurement, value) {
     const { Characteristic } = this.platform.api.hap;
-    const service = this.getServiceByField(field);
+    const service = this.getServiceByMeasurement(measurement);
     if (!service) return;
 
-    this.platform.log('Updating characteristic for field:', field, 'with value:', value);
+    this.platform.log('Updating characteristic for measurement:', measurement, 'with value:', value);
 
-    switch (field) {
+    switch (measurement) {
       case 'temperature':
         service.updateCharacteristic(Characteristic.CurrentTemperature, value);
         break;
@@ -158,7 +159,7 @@ class InfluxDBMultiSensorAccessory {
         service.updateCharacteristic(Characteristic.StatusLowBattery, statusLowBattery);
         break;
       default:
-        this.platform.log.warn('Unsupported sensor field:', field);
+        this.platform.log.warn('Unsupported sensor measurement:', measurement);
     }
   }
 }

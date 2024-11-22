@@ -32,7 +32,7 @@ Add to the `accessories` field of your Homebridge `config.json` file (default lo
       "url": "http://your-influxdb-url:port",
       "token": "your-influxdb-token",
       "organization": "your-influxdb-organization",
-      "bucket": "your-influxdb-bucket",,
+      "bucket": "your-influxdb-bucket",
       "globalValues": {
         "manufacturer": "Your Manufacturer",
         "serialNumber": "1234567890",
@@ -41,11 +41,12 @@ Add to the `accessories` field of your Homebridge `config.json` file (default lo
       "sensors": [
         {
           "name": "Temperature Room1",
-          "fields": [
+          "measurements": [
               "temperature",
               "humidity",
               "battery"
           ],
+          "field": "offset_compensated",
           "tags": {
             "tag-name": "tag-value"
           }

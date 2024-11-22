@@ -22,11 +22,12 @@
       "sensors": [
         {
           "name": "Temperature Room1",
-          "fields": [
+          "measurements": [
               "temperature",
               "humidity",
               "battery"
           ],
+          "field": "offset_compensated",
           "tags": {
               "topic": "zigbee2mqtt/Sensor_Room1"
           }
